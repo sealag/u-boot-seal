@@ -1,0 +1,6 @@
+S5210 BOARD
+M:	Filip Brozovic <fbrozovic@gmail.com>
+S:	Maintained
+F:	board/seal/s5210/
+F:	include/configs/s5210.h
+F:	configs/s5210_defconfig
