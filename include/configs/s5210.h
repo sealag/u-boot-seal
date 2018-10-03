@@ -46,32 +46,24 @@
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"fdtfile=imx6ull-s5210.dtb\0" \
 	"fdt_high=0xffffffff\0" \
 	"initrd_high=0xffffffff\0" \
-	"fdt_addr_r=0x87000000\0" \
-	"fdt_addr=0x87000000\0" \
 	"ip_dyn=yes\0" \
-	"mmcdev=" __stringify(CONFIG_SYS_MMC_ENV_DEV) "\0" \
 	"dfu_alt_info=" \
 		"spl raw 0x2 0xfe mmcpart 1;" \
 		"u-boot raw 0x100 0x1ec0 mmcpart 1;" \
 		"u-boot-env raw 0x1fc0 0x40 mmcpart 1\0" \
-	"kernel_addr_r=" __stringify(CONFIG_LOADADDR) "\0" \
-	"pxefile_addr_r=" __stringify(CONFIG_LOADADDR) "\0" \
-	"ramdisk_addr_r=0x83000000\0" \
-	"ramdiskaddr=0x83000000\0" \
-	"scriptaddr=" __stringify(CONFIG_LOADADDR) "\0" \
-	"bootargs=console=ttymxc3,921600 root=/dev/mmcblk0p1 rw rootfstype=ext4\0" \
+	"fdt_addr_r=0x83000000\0" \
+	"kernel_addr_r=0x82000000\0" \
+	"pxefile_addr_r=0x81f00000\0" \
+	"ramdisk_addr_r=0x84000000\0" \
+	"scriptaddr=0x81f00000\0" \
 	BOOTENV
 
 #define BOOT_TARGET_DEVICES(func) \
-	func(MMC, mmc, 0) \
+	func(MMC, mmc, 1) \
 	func(PXE, pxe, na) \
 	func(DHCP, dhcp, na)
-
-#define CONFIG_BOOTCOMMAND \
-	   "ext4load mmc 1:1 ${kernel_addr_r} /boot/zImage && ext4load mmc 1:1 ${fdt_addr_r} /boot/imx6ull-s5210.dtb && bootz ${kernel_addr_r} - ${fdt_addr_r}"
 
 #include <config_distro_bootcmd.h>
 
