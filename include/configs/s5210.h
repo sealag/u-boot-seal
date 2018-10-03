@@ -9,7 +9,6 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#include <config_distro_defaults.h>
 #include "mx6_common.h"
 #include "imx6_spl.h"
 
@@ -37,9 +36,6 @@
 #define CONFIG_MXC_USB_PORTSC		(PORT_PTS_UTMI | PORT_PTS_PTW)
 #define CONFIG_MXC_USB_FLAGS		0
 #define CONFIG_USBD_HS
-
-/* UMS */
-#define CONFIG_USB_FUNCTION_MASS_STORAGE
 
 /* Ethernet */
 #define CONFIG_MII
@@ -80,7 +76,6 @@
 #include <config_distro_bootcmd.h>
 
 /* Physical Memory Map */
-#define CONFIG_NR_DRAM_BANKS		1
 #define PHYS_SDRAM			MMDC0_ARB_BASE_ADDR
 
 #define CONFIG_SYS_SDRAM_BASE		PHYS_SDRAM
