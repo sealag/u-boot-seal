@@ -1,10 +1,9 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2007
  * Gerald Van Baren, Custom IDEAS, vanbaren@cideas.com
  *
  * Copyright 2010-2011 Freescale Semiconductor, Inc.
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -13,7 +12,7 @@
 #include <linux/ctype.h>
 #include <linux/types.h>
 #include <asm/global_data.h>
-#include <libfdt.h>
+#include <linux/libfdt.h>
 #include <fdt_support.h>
 #include <exports.h>
 #include <fdtdec.h>
@@ -410,46 +409,7 @@ static int fdt_pack_reg(const void *fdt, void *buf, u64 *address, u64 *size,
 	return p - (char *)buf;
 }
 
-int fdt_record_loadable(void *blob, u32 index, const char *name,
-			uintptr_t load_addr, u32 size, uintptr_t entry_point,
-			const char *type, const char *os)
-{
-	int err, node;
-
-	err = fdt_check_header(blob);
-	if (err < 0) {
-		printf("%s: %s\n", __func__, fdt_strerror(err));
-		return err;
-	}
-
-	/* find or create "/fit-images" node */
-	node = fdt_find_or_add_subnode(blob, 0, "fit-images");
-	if (node < 0)
-			return node;
-
-	/* find or create "/fit-images/<name>" node */
-	node = fdt_find_or_add_subnode(blob, node, name);
-	if (node < 0)
-		return node;
-
-	/*
-	 * We record these as 32bit entities, possibly truncating addresses.
-	 * However, spl_fit.c is not 64bit safe either: i.e. we should not
-	 * have an issue here.
-	 */
-	fdt_setprop_u32(blob, node, "load-addr", load_addr);
-	if (entry_point != -1)
-		fdt_setprop_u32(blob, node, "entry-point", entry_point);
-	fdt_setprop_u32(blob, node, "size", size);
-	if (type)
-		fdt_setprop_string(blob, node, "type", type);
-	if (os)
-		fdt_setprop_string(blob, node, "os", os);
-
-	return node;
-}
-
-#ifdef CONFIG_NR_DRAM_BANKS
+#if CONFIG_NR_DRAM_BANKS > 4
 #define MEMORY_BANKS_MAX CONFIG_NR_DRAM_BANKS
 #else
 #define MEMORY_BANKS_MAX 4
@@ -457,7 +417,7 @@ int fdt_record_loadable(void *blob, u32 index, const char *name,
 int fdt_fixup_memory_banks(void *blob, u64 start[], u64 size[], int banks)
 {
 	int err, nodeoffset;
-	int len;
+	int len, i;
 	u8 tmp[MEMORY_BANKS_MAX * 16]; /* Up to 64-bit address + 64-bit size */
 
 	if (banks > MEMORY_BANKS_MAX) {
@@ -486,8 +446,21 @@ int fdt_fixup_memory_banks(void *blob, u64 start[], u64 size[], int banks)
 		return err;
 	}
 
+	for (i = 0; i < banks; i++) {
+		if (start[i] == 0 && size[i] == 0)
+			break;
+	}
+
+	banks = i;
+
 	if (!banks)
 		return 0;
+
+	for (i = 0; i < banks; i++)
+		if (start[i] == 0 && size[i] == 0)
+			break;
+
+	banks = i;
 
 	len = fdt_pack_reg(blob, tmp, start, size, banks);
 
@@ -582,6 +555,45 @@ void fdt_fixup_ethernet(void *fdt)
 					 &mac_addr, 6, 1);
 		}
 	}
+}
+
+int fdt_record_loadable(void *blob, u32 index, const char *name,
+			uintptr_t load_addr, u32 size, uintptr_t entry_point,
+			const char *type, const char *os)
+{
+	int err, node;
+
+	err = fdt_check_header(blob);
+	if (err < 0) {
+		printf("%s: %s\n", __func__, fdt_strerror(err));
+		return err;
+	}
+
+	/* find or create "/fit-images" node */
+	node = fdt_find_or_add_subnode(blob, 0, "fit-images");
+	if (node < 0)
+		return node;
+
+	/* find or create "/fit-images/<name>" node */
+	node = fdt_find_or_add_subnode(blob, node, name);
+	if (node < 0)
+		return node;
+
+	/*
+	 * We record these as 32bit entities, possibly truncating addresses.
+	 * However, spl_fit.c is not 64bit safe either: i.e. we should not
+	 * have an issue here.
+	 */
+	fdt_setprop_u32(blob, node, "load-addr", load_addr);
+	if (entry_point != -1)
+		fdt_setprop_u32(blob, node, "entry-point", entry_point);
+	fdt_setprop_u32(blob, node, "size", size);
+	if (type)
+		fdt_setprop_string(blob, node, "type", type);
+	if (os)
+		fdt_setprop_string(blob, node, "os", os);
+
+	return node;
 }
 
 /* Resize the fdt to its actual size + a bit of padding */
@@ -717,7 +729,7 @@ struct reg_cell {
 	unsigned int r1;
 };
 
-int fdt_del_subnodes(const void *blob, int parent_offset)
+static int fdt_del_subnodes(const void *blob, int parent_offset)
 {
 	int off, ndepth;
 	int ret;
@@ -742,7 +754,7 @@ int fdt_del_subnodes(const void *blob, int parent_offset)
 	return 0;
 }
 
-int fdt_del_partitions(void *blob, int parent_offset)
+static int fdt_del_partitions(void *blob, int parent_offset)
 {
 	const void *prop;
 	int ndepth = 0;
@@ -881,9 +893,9 @@ err_prop:
  *
  *	fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
  */
-void fdt_fixup_mtdparts(void *blob, void *node_info, int node_info_size)
+void fdt_fixup_mtdparts(void *blob, const struct node_info *node_info,
+			int node_info_size)
 {
-	struct node_info *ni = node_info;
 	struct mtd_device *dev;
 	int i, idx;
 	int noff;
@@ -893,12 +905,13 @@ void fdt_fixup_mtdparts(void *blob, void *node_info, int node_info_size)
 
 	for (i = 0; i < node_info_size; i++) {
 		idx = 0;
-		noff = fdt_node_offset_by_compatible(blob, -1, ni[i].compat);
+		noff = fdt_node_offset_by_compatible(blob, -1,
+						     node_info[i].compat);
 		while (noff != -FDT_ERR_NOTFOUND) {
 			debug("%s: %s, mtd dev type %d\n",
 				fdt_get_name(blob, noff, 0),
-				ni[i].compat, ni[i].type);
-			dev = device_find(ni[i].type, idx++);
+				node_info[i].compat, node_info[i].type);
+			dev = device_find(node_info[i].type, idx++);
 			if (dev) {
 				if (fdt_node_set_part_info(blob, noff, dev))
 					return; /* return on error */
@@ -906,7 +919,7 @@ void fdt_fixup_mtdparts(void *blob, void *node_info, int node_info_size)
 
 			/* Jump to next flash node */
 			noff = fdt_node_offset_by_compatible(blob, noff,
-							     ni[i].compat);
+							     node_info[i].compat);
 		}
 	}
 }

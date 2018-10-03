@@ -9,6 +9,7 @@
 #include <dm.h>
 #include <errno.h>
 #include <ns16550.h>
+#include <reset.h>
 #include <serial.h>
 #include <watchdog.h>
 #include <linux/types.h>
@@ -55,7 +56,7 @@ static inline void serial_out_shift(void *addr, int shift, int value)
 {
 #ifdef CONFIG_SYS_NS16550_PORT_MAPPED
 	outb(value, (ulong)addr);
-#elif defined(CONFIG_SYS_NS16550_MEM32) && !defined(CONFIG_SYS_BIG_ENDIAN)
+#elif defined(CONFIG_SYS_NS16550_MEM32) && defined(CONFIG_SYS_LITTLE_ENDIAN)
 	out_le32(addr, value);
 #elif defined(CONFIG_SYS_NS16550_MEM32) && defined(CONFIG_SYS_BIG_ENDIAN)
 	out_be32(addr, value);
@@ -72,7 +73,7 @@ static inline int serial_in_shift(void *addr, int shift)
 {
 #ifdef CONFIG_SYS_NS16550_PORT_MAPPED
 	return inb((ulong)addr);
-#elif defined(CONFIG_SYS_NS16550_MEM32) && !defined(CONFIG_SYS_BIG_ENDIAN)
+#elif defined(CONFIG_SYS_NS16550_MEM32) && defined(CONFIG_SYS_LITTLE_ENDIAN)
 	return in_le32(addr);
 #elif defined(CONFIG_SYS_NS16550_MEM32) && defined(CONFIG_SYS_BIG_ENDIAN)
 	return in_be32(addr);
@@ -177,6 +178,7 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 #if defined(CONFIG_ARCH_OMAP2PLUS)
 	serial_out(0x7, &com_port->mdr1);	/* mode select reset TL16C750*/
 #endif
+
 	serial_out(UART_MCRVAL, &com_port->mcr);
 	serial_out(ns16550_getfcr(com_port), &com_port->fcr);
 	if (baud_divisor != -1)
@@ -339,9 +341,9 @@ static int ns16550_serial_pending(struct udevice *dev, bool input)
 	struct NS16550 *const com_port = dev_get_priv(dev);
 
 	if (input)
-		return serial_in(&com_port->lsr) & UART_LSR_DR ? 1 : 0;
+		return (serial_in(&com_port->lsr) & UART_LSR_DR) ? 1 : 0;
 	else
-		return serial_in(&com_port->lsr) & UART_LSR_THRE ? 0 : 1;
+		return (serial_in(&com_port->lsr) & UART_LSR_THRE) ? 0 : 1;
 }
 
 static int ns16550_serial_getc(struct udevice *dev)
@@ -370,6 +372,12 @@ static int ns16550_serial_setbrg(struct udevice *dev, int baudrate)
 int ns16550_serial_probe(struct udevice *dev)
 {
 	struct NS16550 *const com_port = dev_get_priv(dev);
+	struct reset_ctl_bulk reset_bulk;
+	int ret;
+
+	ret = reset_get_bulk(dev, &reset_bulk);
+	if (!ret)
+		reset_deassert_bulk(&reset_bulk);
 
 	com_port->plat = dev_get_platdata(dev);
 	NS16550_init(com_port, -1);

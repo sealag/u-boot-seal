@@ -1,9 +1,8 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (C) 2015 Technexion Ltd.
  *
  * Configuration settings for the Technexion PICO-IMX6UL-EMMC board.
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 #ifndef __PICO_IMX6UL_CONFIG_H
 #define __PICO_IMX6UL_CONFIG_H
@@ -17,7 +16,6 @@
 /* Network support */
 
 #define CONFIG_FEC_MXC
-#define CONFIG_MII
 #define IMX_FEC_BASE			ENET2_BASE_ADDR
 #define CONFIG_FEC_MXC_PHYADDR		0x1
 #define CONFIG_FEC_XCV_TYPE		RMII
@@ -30,7 +28,6 @@
 
 /* MMC Configs */
 #define CONFIG_FSL_USDHC
-#define CONFIG_FSL_ESDHC
 #define CONFIG_SYS_FSL_ESDHC_ADDR	USDHC1_BASE_ADDR
 #define CONFIG_SUPPORT_EMMC_BOOT
 
@@ -41,8 +38,6 @@
 #define CONFIG_USB_MAX_CONTROLLER_COUNT	2
 
 #define CONFIG_USBD_HS
-
-#define CONFIG_USB_FUNCTION_MASS_STORAGE
 
 #define CONFIG_SYS_DFU_DATA_BUF_SIZE SZ_16M
 #define DFU_DEFAULT_POLL_TIMEOUT 300
@@ -123,10 +118,7 @@
 #define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
 #define CONFIG_SYS_HZ			1000
 
-#define CONFIG_CMDLINE_EDITING
-
 /* Physical Memory Map */
-#define CONFIG_NR_DRAM_BANKS		1
 #define PHYS_SDRAM			MMDC0_ARB_BASE_ADDR
 
 #define CONFIG_SYS_SDRAM_BASE		PHYS_SDRAM

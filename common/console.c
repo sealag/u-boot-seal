@@ -1,8 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2000
  * Paolo Scaffardi, AIRVENT SAM s.p.a - RIMINI(ITALY), arsenio@tin.it
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -197,20 +196,21 @@ static int console_tstc(int file)
 {
 	int i, ret;
 	struct stdio_dev *dev;
+	int prev;
 
-	disable_ctrlc(1);
+	prev = disable_ctrlc(1);
 	for (i = 0; i < cd_count[file]; i++) {
 		dev = console_devices[file][i];
 		if (dev->tstc != NULL) {
 			ret = dev->tstc(dev);
 			if (ret > 0) {
 				tstcdev = dev;
-				disable_ctrlc(0);
+				disable_ctrlc(prev);
 				return ret;
 			}
 		}
 	}
-	disable_ctrlc(0);
+	disable_ctrlc(prev);
 
 	return 0;
 }
@@ -503,8 +503,10 @@ void putc(const char c)
 		return;
 	}
 #endif
+	if (!gd)
+		return;
 #ifdef CONFIG_CONSOLE_RECORD
-	if (gd && (gd->flags & GD_FLG_RECORD) && gd->console_out.start)
+	if ((gd->flags & GD_FLG_RECORD) && gd->console_out.start)
 		membuff_putbyte(&gd->console_out, c);
 #endif
 #ifdef CONFIG_SILENT_CONSOLE
@@ -542,8 +544,10 @@ void puts(const char *s)
 		return;
 	}
 #endif
+	if (!gd)
+		return;
 #ifdef CONFIG_CONSOLE_RECORD
-	if (gd && (gd->flags & GD_FLG_RECORD) && gd->console_out.start)
+	if ((gd->flags & GD_FLG_RECORD) && gd->console_out.start)
 		membuff_put(&gd->console_out, s, strlen(s));
 #endif
 #ifdef CONFIG_SILENT_CONSOLE
@@ -600,7 +604,6 @@ static int ctrlc_disabled = 0;	/* see disable_ctrl() */
 static int ctrlc_was_pressed = 0;
 int ctrlc(void)
 {
-#ifndef CONFIG_SANDBOX
 	if (!ctrlc_disabled && gd->have_console) {
 		if (tstc()) {
 			switch (getc()) {
@@ -612,7 +615,6 @@ int ctrlc(void)
 			}
 		}
 	}
-#endif
 
 	return 0;
 }
@@ -847,7 +849,7 @@ done:
 
 #ifdef CONFIG_SYS_CONSOLE_ENV_OVERWRITE
 	/* set the environment variables (will overwrite previous env settings) */
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < MAX_FILES; i++) {
 		env_set(stdio_names[i], stdio_devices[i]->name);
 	}
 #endif /* CONFIG_SYS_CONSOLE_ENV_OVERWRITE */
@@ -926,7 +928,7 @@ int console_init_r(void)
 #endif /* CONFIG_SYS_CONSOLE_INFO_QUIET */
 
 	/* Setting environment variables */
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < MAX_FILES; i++) {
 		env_set(stdio_names[i], stdio_devices[i]->name);
 	}
 
