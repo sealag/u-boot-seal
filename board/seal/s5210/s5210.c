@@ -1,9 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright (C) 2018 SEAL AG
- *
- * Author: Filip Brozovic <fbrozovic@gmail.com>
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <asm/arch/clock.h>

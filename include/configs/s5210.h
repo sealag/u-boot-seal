@@ -1,9 +1,8 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (C) 2018 SEAL AG
  *
- * Configuration settings for the SEAL S5210 board.
- *
- * SPDX-License-Identifier:	GPL-2.0+
+ * Configuration settings for the SEAL S5210
  */
 
 #ifndef __CONFIG_H
