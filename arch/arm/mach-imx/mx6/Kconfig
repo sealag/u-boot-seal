@@ -556,6 +556,13 @@ config TARGET_S5220
 	select DM
 	select SUPPORT_SPL
 
+config TARGET_S5628
+	bool "SEAL S5628"
+	select MX6ULL
+	select BOARD_LATE_INIT
+	select DM
+	select SUPPORT_SPL
+
 config TARGET_SECOMX6
 	bool "secomx6 boards"
 
@@ -739,6 +746,7 @@ source "board/liebherr/mccmon6/Kconfig"
 source "board/logicpd/imx6/Kconfig"
 source "board/seal/s5210/Kconfig"
 source "board/seal/s5220/Kconfig"
+source "board/seal/s5628/Kconfig"
 source "board/seco/Kconfig"
 source "board/sks-kinkel/sksimx6/Kconfig"
 source "board/solidrun/mx6cuboxi/Kconfig"

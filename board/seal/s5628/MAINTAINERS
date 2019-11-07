@@ -1,0 +1,8 @@
+S5628 BOARD
+M:	Filip Brozovic <fbrozovic@gmail.com>
+S:	Maintained
+F:	board/seal/common/imx6ull_plat.c
+F:	board/seal/common/imx6ull_spl.c
+F:	board/seal/s5628/
+F:	configs/s5628_defconfig
+F:	include/configs/s5628.h

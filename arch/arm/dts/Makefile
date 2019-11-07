@@ -714,6 +714,7 @@ dtb-$(CONFIG_MX6ULL) += \
 	imx6ull-dart-6ul.dtb \
 	imx6ull-s5210.dtb \
 	imx6ull-s5220.dtb \
+	imx6ull-s5628.dtb \
 	imx6ull-somlabs-visionsom.dtb \
 	imx6ulz-14x14-evk.dtb
 
