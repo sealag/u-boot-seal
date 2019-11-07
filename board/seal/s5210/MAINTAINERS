@@ -1,0 +1,8 @@
+S5210 BOARD
+M:	Filip Brozovic <fbrozovic@gmail.com>
+S:	Maintained
+F:	board/seal/common/imx6ull_plat.c
+F:	board/seal/common/imx6ull_spl.c
+F:	board/seal/s5210/
+F:	configs/s5210_defconfig
+F:	include/configs/s5210.h
