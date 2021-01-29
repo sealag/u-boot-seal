@@ -4,11 +4,13 @@
  */
 
 #include <common.h>
+#include <init.h>
 #include <led.h>
 #include <spl.h>
 #include <asm/arch/crm_regs.h>
 #include <asm/arch/mx6-ddr.h>
 #include <asm/io.h>
+#include <linux/delay.h>
 
 static struct mx6ul_iomux_ddr_regs mx6_ddr_ioregs = {
 	.dram_dqm0 = 0x00000030,
