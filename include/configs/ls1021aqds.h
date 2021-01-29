@@ -7,8 +7,6 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define CONFIG_ARMV7_PSCI_1_0
-
 #define CONFIG_ARMV7_SECURE_BASE	OCRAM_BASE_S_ADDR
 
 #define CONFIG_SYS_FSL_CLK
@@ -363,22 +361,6 @@ unsigned long get_board_ddr_clk(void);
  * MMC
  */
 
-/* SPI */
-#if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_SD_BOOT_QSPI)
-/* QSPI */
-#define QSPI0_AMBA_BASE			0x40000000
-#define FSL_QSPI_FLASH_SIZE		(1 << 24)
-#define FSL_QSPI_FLASH_NUM		2
-
-/* DSPI */
-
-/* DM SPI */
-#if defined(CONFIG_FSL_DSPI) || defined(CONFIG_FSL_QSPI)
-#define CONFIG_DM_SPI_FLASH
-#define CONFIG_SPI_FLASH_DATAFLASH
-#endif
-#endif
-
 /*
  * Video
  */
@@ -418,8 +400,6 @@ unsigned long get_board_ddr_clk(void);
 #define TSEC3_PHYIDX			0
 
 #define CONFIG_ETHPRIME			"eTSEC1"
-
-#define CONFIG_PHY_REALTEK
 
 #define CONFIG_HAS_ETH0
 #define CONFIG_HAS_ETH1
@@ -474,9 +454,6 @@ unsigned long get_board_ddr_clk(void);
  */
 #define CONFIG_SYS_BOOTMAPSZ		(256 << 20)
 
-#define CONFIG_SYS_MEMTEST_START	0x80000000
-#define CONFIG_SYS_MEMTEST_END		0x9fffffff
-
 #define CONFIG_SYS_LOAD_ADDR		0x82000000
 
 #define CONFIG_LS102XA_STREAM_ID
@@ -495,11 +472,6 @@ unsigned long get_board_ddr_clk(void);
 /*
  * Environment
  */
-#define CONFIG_ENV_OVERWRITE
-
-#if defined(CONFIG_SD_BOOT)
-#define CONFIG_SYS_MMC_ENV_DEV		0
-#endif
 
 #include <asm/fsl_secure_boot.h>
 #define CONFIG_SYS_BOOTM_LEN	(64 << 20) /* Increase max gunzip size */

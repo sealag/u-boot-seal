@@ -9,6 +9,7 @@
 #include <common.h>
 #include <dm.h>
 #include <errno.h>
+#include <log.h>
 #include <sysreset.h>
 #include <dm/device_compat.h>
 #include <linux/err.h>
@@ -50,8 +51,7 @@ static int ti_sci_sysreset_request(struct udevice *dev, enum sysreset_t type)
 
 	ret = cops->reboot_device(sci);
 	if (ret)
-		dev_err(rst->dev, "%s: reboot_device failed (%d)\n",
-			__func__, ret);
+		dev_err(dev, "%s: reboot_device failed (%d)\n", __func__, ret);
 
 	return ret;
 }

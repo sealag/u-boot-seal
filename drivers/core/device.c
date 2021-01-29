@@ -10,11 +10,13 @@
 
 #include <common.h>
 #include <cpu_func.h>
+#include <log.h>
 #include <asm/io.h>
 #include <clk.h>
 #include <fdtdec.h>
 #include <fdt_support.h>
 #include <malloc.h>
+#include <asm/cache.h>
 #include <dm/device.h>
 #include <dm/device-internal.h>
 #include <dm/lists.h>
@@ -80,7 +82,8 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 		 * This is just a 'requested' sequence, and will be
 		 * resolved (and ->seq updated) when the device is probed.
 		 */
-		if (CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)) {
+		if (CONFIG_IS_ENABLED(OF_CONTROL) &&
+		    !CONFIG_IS_ENABLED(OF_PLATDATA)) {
 			if (uc->uc_drv->name && ofnode_valid(node))
 				dev_read_alias_seq(dev, &dev->req_seq);
 #if CONFIG_IS_ENABLED(OF_PRIOR_STAGE)
@@ -143,11 +146,9 @@ static int device_bind_common(struct udevice *parent, const struct driver *drv,
 				goto fail_alloc3;
 			}
 		}
-	}
-
-	/* put dev into parent's successor list */
-	if (parent)
+		/* put dev into parent's successor list */
 		list_add_tail(&dev->sibling_node, &parent->child_head);
+	}
 
 	ret = uclass_bind_device(dev);
 	if (ret)
@@ -252,6 +253,7 @@ int device_bind_by_name(struct udevice *parent, bool pre_reloc_only,
 {
 	struct driver *drv;
 	uint platdata_size = 0;
+	int ret;
 
 	drv = lists_driver_lookup_name(info->name);
 	if (!drv)
@@ -262,9 +264,35 @@ int device_bind_by_name(struct udevice *parent, bool pre_reloc_only,
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
 	platdata_size = info->platdata_size;
 #endif
-	return device_bind_common(parent, drv, info->name,
-			(void *)info->platdata, 0, ofnode_null(), platdata_size,
-			devp);
+	ret = device_bind_common(parent, drv, info->name,
+				 (void *)info->platdata, 0, ofnode_null(),
+				 platdata_size, devp);
+	if (ret)
+		return ret;
+
+	return ret;
+}
+
+int device_reparent(struct udevice *dev, struct udevice *new_parent)
+{
+	struct udevice *pos, *n;
+
+	assert(dev);
+	assert(new_parent);
+
+	list_for_each_entry_safe(pos, n, &dev->parent->child_head,
+				 sibling_node) {
+		if (pos->driver != dev->driver)
+			continue;
+
+		list_del(&dev->sibling_node);
+		list_add_tail(&dev->sibling_node, &new_parent->child_head);
+		dev->parent = new_parent;
+
+		break;
+	}
+
+	return 0;
 }
 
 static void *alloc_priv(int size, uint flags)
@@ -322,6 +350,22 @@ int device_ofdata_to_platdata(struct udevice *dev)
 
 	if (dev->flags & DM_FLAG_PLATDATA_VALID)
 		return 0;
+
+	/* Ensure all parents have ofdata */
+	if (dev->parent) {
+		ret = device_ofdata_to_platdata(dev->parent);
+		if (ret)
+			goto fail;
+
+		/*
+		 * The device might have already been probed during
+		 * the call to device_probe() on its parent device
+		 * (e.g. PCI bridge devices). Test the flags again
+		 * so that we don't mess up the device.
+		 */
+		if (dev->flags & DM_FLAG_PLATDATA_VALID)
+			return 0;
+	}
 
 	drv = dev->driver;
 	assert(drv);
@@ -712,6 +756,34 @@ int device_get_global_by_ofnode(ofnode ofnode, struct udevice **devp)
 	dev = _device_find_global_by_ofnode(gd->dm_root, ofnode);
 	return device_get_device_tail(dev, dev ? 0 : -ENOENT, devp);
 }
+
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+int device_get_by_driver_info(const struct driver_info *info,
+			      struct udevice **devp)
+{
+	struct driver_info *info_base =
+		ll_entry_start(struct driver_info, driver_info);
+	int idx = info - info_base;
+	struct driver_rt *drt = gd_dm_driver_rt() + idx;
+	struct udevice *dev;
+
+	dev = drt->dev;
+	*devp = NULL;
+
+	return device_get_device_tail(dev, dev ? 0 : -ENOENT, devp);
+}
+
+int device_get_by_driver_info_idx(uint idx, struct udevice **devp)
+{
+	struct driver_rt *drt = gd_dm_driver_rt() + idx;
+	struct udevice *dev;
+
+	dev = drt->dev;
+	*devp = NULL;
+
+	return device_get_device_tail(dev, dev ? 0 : -ENOENT, devp);
+}
+#endif
 
 int device_find_first_child(const struct udevice *parent, struct udevice **devp)
 {

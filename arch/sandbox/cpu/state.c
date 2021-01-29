@@ -6,6 +6,7 @@
 #include <common.h>
 #include <errno.h>
 #include <fdtdec.h>
+#include <log.h>
 #include <os.h>
 #include <asm/malloc.h>
 #include <asm/state.h>
@@ -357,6 +358,7 @@ void state_reset_for_test(struct sandbox_state *state)
 	/* No reset yet, so mark it as such. Always allow power reset */
 	state->last_sysreset = SYSRESET_COUNT;
 	state->sysreset_allowed[SYSRESET_POWER_OFF] = true;
+	state->sysreset_allowed[SYSRESET_COLD] = true;
 	state->allow_memio = false;
 
 	memset(&state->wdt, '\0', sizeof(state->wdt));
@@ -377,7 +379,10 @@ int state_init(void)
 
 	state->ram_size = CONFIG_SYS_SDRAM_SIZE;
 	state->ram_buf = os_malloc(state->ram_size);
-	assert(state->ram_buf);
+	if (!state->ram_buf) {
+		printf("Out of memory\n");
+		os_exit(1);
+	}
 
 	state_reset_for_test(state);
 	/*

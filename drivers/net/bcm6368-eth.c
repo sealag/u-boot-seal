@@ -10,6 +10,7 @@
 #include <clk.h>
 #include <dm.h>
 #include <dma.h>
+#include <log.h>
 #include <malloc.h>
 #include <miiphy.h>
 #include <net.h>
@@ -17,6 +18,7 @@
 #include <wait_bit.h>
 #include <asm/io.h>
 #include <dm/device_compat.h>
+#include <linux/delay.h>
 
 #define ETH_PORT_STR			"brcm,enetsw-port"
 
@@ -247,8 +249,7 @@ static int bcm6368_eth_adjust_link(struct udevice *dev)
 
 		/* link changed */
 		if (!up) {
-			dev_info(&priv->pdev->dev, "link DOWN on %s\n",
-				 port->name);
+			dev_info(dev, "link DOWN on %s\n", port->name);
 			writeb_be(ETH_PORTOV_ENABLE_MASK,
 				  priv->base + ETH_PORTOV_REG(i));
 			writeb_be(ETH_PTCTRL_RXDIS_MASK |

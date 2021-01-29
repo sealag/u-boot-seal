@@ -9,6 +9,7 @@
 #include <common.h>
 #include <clk-uclass.h>
 #include <dm.h>
+#include <log.h>
 #include <dm/device.h>
 #include <dm/device_compat.h>
 #include <dm/lists.h>
@@ -19,6 +20,8 @@
 #include <power-domain.h>
 #include <regmap.h>
 #include <syscon.h>
+#include <linux/bitops.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 
 #define CMU_R07C		0x7c
@@ -315,13 +318,13 @@ static int serdes_am654_of_xlate(struct phy *x,
 	struct serdes_am654 *phy = dev_get_priv(x->dev);
 
 	if (args->args_count != 2) {
-		dev_err(phy->dev, "Invalid DT PHY argument count: %d\n",
+		dev_err(x->dev, "Invalid DT PHY argument count: %d\n",
 			args->args_count);
 		return -EINVAL;
 	}
 
 	if (args->args[0] != PHY_TYPE_PCIE) {
-		dev_err(phy->dev, "Unrecognized PHY type: %d\n",
+		dev_err(x->dev, "Unrecognized PHY type: %d\n",
 			args->args[0]);
 		return -EINVAL;
 	}

@@ -9,6 +9,7 @@
 #include <clk.h>
 #include <dm.h>
 #include <errno.h>
+#include <log.h>
 #include <ns16550.h>
 #include <reset.h>
 #include <serial.h>
@@ -476,6 +477,8 @@ static int ns16550_serial_getinfo(struct udevice *dev,
 	info->reg_width = plat->reg_width;
 	info->reg_shift = plat->reg_shift;
 	info->reg_offset = plat->reg_offset;
+	info->clock = plat->clock;
+
 	return 0;
 }
 
@@ -617,6 +620,10 @@ U_BOOT_DRIVER(ns16550_serial) = {
 	.flags	= DM_FLAG_PRE_RELOC,
 #endif
 };
+
+U_BOOT_DRIVER_ALIAS(ns16550_serial, rockchip_rk3328_uart)
+U_BOOT_DRIVER_ALIAS(ns16550_serial, rockchip_rk3368_uart)
+U_BOOT_DRIVER_ALIAS(ns16550_serial, ti_da830_uart)
 #endif
 #endif /* SERIAL_PRESENT */
 

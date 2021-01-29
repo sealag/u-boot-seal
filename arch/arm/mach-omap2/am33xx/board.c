@@ -12,7 +12,9 @@
 #include <debug_uart.h>
 #include <errno.h>
 #include <init.h>
+#include <net.h>
 #include <ns16550.h>
+#include <omap3_spi.h>
 #include <spl.h>
 #include <asm/arch/cpu.h>
 #include <asm/arch/hardware.h>
@@ -31,6 +33,7 @@
 #include <i2c.h>
 #include <miiphy.h>
 #include <cpsw.h>
+#include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/compiler.h>
 #include <linux/usb/ch9.h>
@@ -46,6 +49,12 @@
 #define AM43XX_SDRAM_TYPE_DDR3				3
 #define AM43XX_READ_WRITE_LEVELING_CTRL_OFFSET		0xDC
 #define AM43XX_RDWRLVLFULL_START			0x80000000
+
+/* SPI flash. */
+#if CONFIG_IS_ENABLED(DM_SPI) && !CONFIG_IS_ENABLED(OF_CONTROL)
+#define AM33XX_SPI0_BASE	0x48030000
+#define AM33XX_SPI0_OFFSET	(AM33XX_SPI0_BASE + OMAP4_MCSPI_REG_OFFSET)
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -140,6 +149,17 @@ U_BOOT_DEVICES(am33xx_gpios) = {
 #endif
 };
 #endif
+#if CONFIG_IS_ENABLED(DM_SPI) && !CONFIG_IS_ENABLED(OF_CONTROL)
+static const struct omap3_spi_plat omap3_spi_pdata = {
+	.regs = (struct mcspi *)AM33XX_SPI0_OFFSET,
+	.pin_dir = MCSPI_PINDIR_D0_IN_D1_OUT,
+};
+
+U_BOOT_DEVICE(am33xx_spi) = {
+	.name = "omap3_spi",
+	.platdata = &omap3_spi_pdata,
+};
+#endif
 #endif
 
 #if !CONFIG_IS_ENABLED(DM_GPIO)
@@ -158,7 +178,7 @@ const struct gpio_bank *const omap_gpio_bank = gpio_bank_am33xx;
 #endif
 
 #if defined(CONFIG_MMC_OMAP_HS)
-int cpu_mmc_init(bd_t *bis)
+int cpu_mmc_init(struct bd_info *bis)
 {
 	int ret;
 

@@ -103,7 +103,7 @@ enum {
  */
 struct usb_device {
 	int	devnum;			/* Device number on USB bus */
-	int	speed;			/* full/low/high */
+	enum usb_device_speed speed;	/* full/low/high */
 	char	mf[32];			/* manufacturer */
 	char	prod[32];		/* product */
 	char	serial[32];		/* serial number */
@@ -920,6 +920,15 @@ struct ehci_ctrl;
  * instead of as a host. It is untested.
  */
 int usb_setup_ehci_gadget(struct ehci_ctrl **ctlrp);
+
+/**
+ * usb_remove_ehci_gadget() - Remove a gadget USB device
+ *
+ * TODO(sjg@chromium.org): Tidy this up when USB gadgets can use driver model
+ *
+ * This provides a way to tell a controller to remove a USB device
+ */
+int usb_remove_ehci_gadget(struct ehci_ctrl **ctlrp);
 
 /**
  * usb_stor_reset() - Prepare to scan USB storage devices

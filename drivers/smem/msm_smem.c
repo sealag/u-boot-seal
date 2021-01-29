@@ -13,6 +13,7 @@
 #include <dm/of_access.h>
 #include <dm/of_addr.h>
 #include <asm/io.h>
+#include <linux/bug.h>
 #include <linux/err.h>
 #include <linux/ioport.h>
 #include <linux/io.h>
@@ -878,7 +879,7 @@ static int qcom_smem_probe(struct udevice *dev)
 	header = smem->regions[0].virt_base;
 	if (le32_to_cpu(header->initialized) != 1 ||
 	    le32_to_cpu(header->reserved)) {
-		dev_err(&pdev->dev, "SMEM is not initialized by SBL\n");
+		dev_err(dev, "SMEM is not initialized by SBL\n");
 		return -EINVAL;
 	}
 

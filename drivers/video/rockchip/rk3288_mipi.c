@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0+
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2017, Fuzhou Rockchip Electronics Co., Ltd
  * Author: Eric Gao <eric.gao@rock-chips.com>
@@ -8,7 +8,7 @@
 #include <clk.h>
 #include <display.h>
 #include <dm.h>
-#include <fdtdec.h>
+#include <log.h>
 #include <panel.h>
 #include <regmap.h>
 #include "rk_mipi.h"

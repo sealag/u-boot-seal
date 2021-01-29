@@ -8,10 +8,12 @@
 #include <clk.h>
 #include <dm.h>
 #include <fsl_lpuart.h>
+#include <log.h>
 #include <watchdog.h>
 #include <asm/io.h>
 #include <serial.h>
 #include <dm/device_compat.h>
+#include <linux/bitops.h>
 #include <linux/compiler.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch/clock.h>
@@ -516,7 +518,7 @@ static int lpuart_serial_ofdata_to_platdata(struct udevice *dev)
 	int node = dev_of_offset(dev);
 	fdt_addr_t addr;
 
-	addr = devfdt_get_addr(dev);
+	addr = dev_read_addr(dev);
 	if (addr == FDT_ADDR_T_NONE)
 		return -EINVAL;
 

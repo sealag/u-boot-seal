@@ -5,7 +5,10 @@
 
 #include <common.h>
 #include <binman_sym.h>
+#include <bootstage.h>
 #include <dm.h>
+#include <image.h>
+#include <log.h>
 #include <malloc.h>
 #include <spi.h>
 #include <spl.h>
@@ -87,7 +90,8 @@ static int apl_flash_probe(struct udevice *dev)
  */
 static int apl_flash_bind(struct udevice *dev)
 {
-	if (CONFIG_IS_ENABLED(OF_PLATDATA)) {
+	if (CONFIG_IS_ENABLED(OF_PLATDATA) &&
+	    !CONFIG_IS_ENABLED(OF_PLATDATA_PARENT)) {
 		struct dm_spi_slave_platdata *plat;
 		struct udevice *spi;
 		int ret;

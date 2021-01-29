@@ -9,12 +9,14 @@
 #define LOG_CATEGORY UCLASS_ACPI_PMC
 
 #include <common.h>
-#include <acpi_s3.h>
 #include <dt-structs.h>
 #include <dm.h>
+#include <log.h>
 #include <spl.h>
+#include <acpi/acpi_s3.h>
 #include <asm/io.h>
 #include <asm/pci.h>
+#include <linux/bitops.h>
 #include <power/acpi_pmc.h>
 
 #define GPIO_GPE_CFG		0x1050
@@ -116,7 +118,8 @@ int apl_pmc_ofdata_to_uc_platdata(struct udevice *dev)
 	int size;
 	int ret;
 
-	ret = dev_read_u32_array(dev, "early-regs", base, ARRAY_SIZE(base));
+	ret = dev_read_u32_array(dev, "early-regs", base,
+				 ARRAY_SIZE(base));
 	if (ret)
 		return log_msg_ret("Missing/short early-regs", ret);
 	if (spl_phase() == PHASE_TPL) {
@@ -130,11 +133,6 @@ int apl_pmc_ofdata_to_uc_platdata(struct udevice *dev)
 					   plat->bdf);
 	}
 	upriv->acpi_base = base[4];
-
-	/* Since PCI is not enabled, we must get the BDF manually */
-	plat->bdf = pci_get_devfn(dev);
-	if (plat->bdf < 0)
-		return log_msg_ret("Cannot get PMC PCI address", plat->bdf);
 
 	/* Get the dwX values for pmc gpe settings */
 	size = dev_read_size(dev, "gpe0-dw");
@@ -219,7 +217,7 @@ static const struct udevice_id apl_pmc_ids[] = {
 	{ }
 };
 
-U_BOOT_DRIVER(apl_pmc) = {
+U_BOOT_DRIVER(intel_apl_pmc) = {
 	.name		= "intel_apl_pmc",
 	.id		= UCLASS_ACPI_PMC,
 	.of_match	= apl_pmc_ids,

@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <setjmp.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -79,13 +80,21 @@ int os_open(const char *pathname, int os_flags)
 		flags |= O_CREAT;
 	if (os_flags & OS_O_TRUNC)
 		flags |= O_TRUNC;
+	/*
+	 * During a cold reset execv() is used to relaunch the U-Boot binary.
+	 * We must ensure that all files are closed in this case.
+	 */
+	flags |= O_CLOEXEC;
 
 	return open(pathname, flags, 0777);
 }
 
 int os_close(int fd)
 {
-	return close(fd);
+	/* Do not close the console input */
+	if (fd)
+		return close(fd);
+	return -1;
 }
 
 int os_unlink(const char *pathname)
@@ -175,6 +184,13 @@ void os_fd_restore(void)
 	}
 }
 
+static void os_sigint_handler(int sig)
+{
+	os_fd_restore();
+	signal(SIGINT, SIG_DFL);
+	raise(SIGINT);
+}
+
 /* Put tty into raw mode so <tab> and <ctrl+c> work */
 void os_tty_raw(int fd, bool allow_sigs)
 {
@@ -205,6 +221,7 @@ void os_tty_raw(int fd, bool allow_sigs)
 
 	term_setup = true;
 	atexit(os_fd_restore);
+	signal(SIGINT, os_sigint_handler);
 }
 
 void *os_malloc(size_t length)
@@ -804,4 +821,10 @@ void *os_find_text_base(void)
 	close(fd);
 
 	return base;
+}
+
+void os_relaunch(char *argv[])
+{
+	execv(argv[0], argv);
+	os_exit(1);
 }

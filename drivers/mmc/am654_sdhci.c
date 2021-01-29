@@ -13,6 +13,7 @@
 #include <regmap.h>
 #include <sdhci.h>
 #include <dm/device_compat.h>
+#include <linux/bitops.h>
 #include <linux/err.h>
 
 /* CTL_CFG Registers */
@@ -74,7 +75,7 @@ struct am654_sdhci_plat {
 	struct mmc mmc;
 	struct regmap *base;
 	bool non_removable;
-	u32 otap_del_sel[11];
+	u32 otap_del_sel[MMC_MODES_END];
 	u32 trm_icp;
 	u32 drv_strength;
 	u32 strb_sel;

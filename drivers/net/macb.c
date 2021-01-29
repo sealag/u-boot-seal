@@ -6,6 +6,8 @@
 #include <clk.h>
 #include <cpu_func.h>
 #include <dm.h>
+#include <log.h>
+#include <linux/delay.h>
 
 /*
  * The u-boot networking stack is a little weird.  It seems like the
@@ -1054,7 +1056,7 @@ static int macb_recv(struct eth_device *netdev)
 	}
 }
 
-static int macb_init(struct eth_device *netdev, bd_t *bd)
+static int macb_init(struct eth_device *netdev, struct bd_info *bd)
 {
 	struct macb_device *macb = to_macb(netdev);
 

@@ -12,8 +12,10 @@
 #include <common.h>
 #include <clk.h>
 #include <dm.h>
+#include <dm/device_compat.h>
 #include <dm/lists.h>
 #include <dm/root.h>
+#include <linux/delay.h>
 #include <linux/usb/musb.h>
 #include <usb.h>
 #include "linux-compat.h"
@@ -243,17 +245,17 @@ static int mtk_musb_init(struct musb *musb)
 
 	ret = clk_enable(&glue->usbpllclk);
 	if (ret) {
-		dev_err(dev, "failed to enable usbpll clock\n");
+		dev_err(musb->controller, "failed to enable usbpll clock\n");
 		return ret;
 	}
 	ret = clk_enable(&glue->usbmcuclk);
 	if (ret) {
-		dev_err(dev, "failed to enable usbmcu clock\n");
+		dev_err(musb->controller, "failed to enable usbmcu clock\n");
 		return ret;
 	}
 	ret = clk_enable(&glue->usbclk);
 	if (ret) {
-		dev_err(dev, "failed to enable usb clock\n");
+		dev_err(musb->controller, "failed to enable usb clock\n");
 		return ret;
 	}
 

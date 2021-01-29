@@ -13,6 +13,7 @@
 #include <common.h>
 #include <clk.h>
 #include <dm.h>
+#include <log.h>
 #include <dm/device.h>
 #include <generic-phy.h>
 #include <phy-sun4i-usb.h>
@@ -22,6 +23,8 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/cpu.h>
 #include <dm/device_compat.h>
+#include <linux/bitops.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 
 #define REG_ISCR			0x00
@@ -269,17 +272,20 @@ static int sun4i_usb_phy_init(struct phy *phy)
 
 	ret = clk_enable(&usb_phy->clocks);
 	if (ret) {
-		dev_err(dev, "failed to enable usb_%ldphy clock\n", phy->id);
+		dev_err(phy->dev, "failed to enable usb_%ldphy clock\n",
+			phy->id);
 		return ret;
 	}
 
 	ret = reset_deassert(&usb_phy->resets);
 	if (ret) {
-		dev_err(dev, "failed to deassert usb_%ldreset reset\n", phy->id);
+		dev_err(phy->dev, "failed to deassert usb_%ldreset reset\n",
+			phy->id);
 		return ret;
 	}
 
-	if (data->cfg->type == sun8i_a83t_phy) {
+	if (data->cfg->type == sun8i_a83t_phy ||
+	    data->cfg->type == sun50i_h6_phy) {
 		if (phy->id == 0) {
 			val = readl(data->base + data->cfg->phyctl_offset);
 			val |= PHY_CTL_VBUSVLDEXT;
@@ -321,7 +327,8 @@ static int sun4i_usb_phy_exit(struct phy *phy)
 	int ret;
 
 	if (phy->id == 0) {
-		if (data->cfg->type == sun8i_a83t_phy) {
+		if (data->cfg->type == sun8i_a83t_phy ||
+		    data->cfg->type == sun50i_h6_phy) {
 			void __iomem *phyctl = data->base +
 				data->cfg->phyctl_offset;
 
@@ -333,13 +340,15 @@ static int sun4i_usb_phy_exit(struct phy *phy)
 
 	ret = clk_disable(&usb_phy->clocks);
 	if (ret) {
-		dev_err(dev, "failed to disable usb_%ldphy clock\n", phy->id);
+		dev_err(phy->dev, "failed to disable usb_%ldphy clock\n",
+			phy->id);
 		return ret;
 	}
 
 	ret = reset_assert(&usb_phy->resets);
 	if (ret) {
-		dev_err(dev, "failed to assert usb_%ldreset reset\n", phy->id);
+		dev_err(phy->dev, "failed to assert usb_%ldreset reset\n",
+			phy->id);
 		return ret;
 	}
 

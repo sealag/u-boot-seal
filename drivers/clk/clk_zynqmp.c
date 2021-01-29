@@ -6,6 +6,7 @@
  */
 
 #include <common.h>
+#include <log.h>
 #include <malloc.h>
 #include <dm/device_compat.h>
 #include <linux/bitops.h>
@@ -709,7 +710,7 @@ static const struct udevice_id zynqmp_clk_ids[] = {
 };
 
 U_BOOT_DRIVER(zynqmp_clk) = {
-	.name = "zynqmp-clk",
+	.name = "zynqmp_clk",
 	.id = UCLASS_CLK,
 	.of_match = zynqmp_clk_ids,
 	.probe = zynqmp_clk_probe,

@@ -9,6 +9,7 @@
 #include <common.h>
 #include <env.h>
 #include <errno.h>
+#include <log.h>
 #include <malloc.h>
 #include <mmc.h>
 #include <fat.h>
@@ -17,7 +18,7 @@
 #include <linux/list.h>
 #include <linux/compiler.h>
 
-static LIST_HEAD(dfu_list);
+LIST_HEAD(dfu_list);
 static int dfu_alt_num;
 static int alt_num_cnt;
 static struct hash_algo *dfu_hash_algo;
