@@ -553,14 +553,14 @@ config TARGET_PCL063_ULL
 
 config TARGET_S5210
 	bool "SEAL S5210"
-	select MX6ULL
+	depends on MX6ULL
 	select BOARD_LATE_INIT
 	select DM
 	select SUPPORT_SPL
 
 config TARGET_S5220
 	bool "SEAL S5220"
-	select MX6ULL
+	depends on MX6ULL
 	select BOARD_LATE_INIT
 	select DM
 	select SUPPORT_SPL
