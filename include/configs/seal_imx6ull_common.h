@@ -59,8 +59,4 @@
 #define CONFIG_SYS_INIT_SP_ADDR \
 	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
-/* Environment organization */
-#define CONFIG_SYS_MMC_ENV_DEV		1
-#define CONFIG_SYS_MMC_ENV_PART		1
-
 #endif /* __SEAL_IMX6ULL_COMMON_H */
