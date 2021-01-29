@@ -556,6 +556,13 @@ config TARGET_S5210
 	depends on MX6ULL
 	select BOARD_LATE_INIT
 	select DM
+	select DM_ETH
+	select DM_GPIO
+	select DM_I2C
+	select DM_MMC
+	select DM_SERIAL
+	select DM_THERMAL
+	select DM_USB
 	select SUPPORT_SPL
 
 config TARGET_S5220
@@ -563,6 +570,13 @@ config TARGET_S5220
 	depends on MX6ULL
 	select BOARD_LATE_INIT
 	select DM
+	select DM_ETH
+	select DM_GPIO
+	select DM_I2C
+	select DM_MMC
+	select DM_SERIAL
+	select DM_THERMAL
+	select DM_USB
 	select SUPPORT_SPL
 
 config TARGET_SECOMX6
