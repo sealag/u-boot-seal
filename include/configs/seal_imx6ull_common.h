@@ -32,6 +32,10 @@
 		"spl raw 0x2 0xfe mmcpart 1;" \
 		"u-boot raw 0x100 0x1ec0 mmcpart 1;" \
 		"u-boot-env raw 0x1fc0 0x40 mmcpart 1\0" \
+	"fastboot_raw_partition_spl=0x2 0xfe mmcpart 1\0" \
+	"fastboot_raw_partition_uboot=0x100 0x1ec0 mmcpart 1\0" \
+	"fastboot_raw_partition_ubootenv=0x1fc0 0x40 mmcpart 1\0" \
+	"fastboot_raw_partition_boot=0x2 0x1fbe mmcpart 1\0" \
 	"partitions=name=rootfs,size=-\0" \
 	"fdt_addr_r=0x83000000\0" \
 	"kernel_addr_r=0x82000000\0" \
@@ -58,5 +62,8 @@
 	(CONFIG_SYS_INIT_RAM_SIZE - GENERATED_GBL_DATA_SIZE)
 #define CONFIG_SYS_INIT_SP_ADDR \
 	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
+
+#undef CONFIG_SPL_PAD_TO
+#define CONFIG_SPL_PAD_TO 0x1FC00
 
 #endif /* __SEAL_IMX6ULL_COMMON_H */
