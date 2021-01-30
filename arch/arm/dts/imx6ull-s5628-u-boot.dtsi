@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (C) 2020 SEAL AG
+ */
+
+#include "seal-imx6ull-common-u-boot.dtsi"
+
+/ {
+	config {
+		u-boot,boot-leds = "red";
+		u-boot,fastboot-leds = "red", "blue";
+		u-boot,usb-mass-storage-leds = "green", "blue";
+		seal,boot-selection-gpios = <&gpio4 17 GPIO_ACTIVE_LOW>;
+	};
+
+	asrc: dummy {
+	};
+
+	gpio-leds {
+		u-boot,dm-spl;
+
+		red-led {
+			u-boot,dm-spl;
+		};
+
+		green-led {
+			u-boot,dm-spl;
+		};
+
+		blue-led {
+			u-boot,dm-spl;
+		};
+	};
+};
+
+&gpio4 {
+	pinctrl-0 = <&pinctrl_gpio4_hog>, <&pinctrl_config>;
+};
+
+&iomuxc {
+	pinctrl_config: configgrp {
+		fsl,pins = <
+			/* User button (used for entering fastboot) */
+			MX6UL_PAD_CSI_MCLK__GPIO4_IO17		0x1f080
+		>;
+	};
+};
+
+&usdhc1 {
+	status = "disabled";
+};
