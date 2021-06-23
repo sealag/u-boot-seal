@@ -596,11 +596,6 @@ config TARGET_S5628
 config TARGET_SECOMX6
 	bool "secomx6 boards"
 
-config TARGET_SKSIMX6
-	bool "sks-imx6"
-	depends on MX6QDL
-	select SUPPORT_SPL
-
 config TARGET_SOMLABS_VISIONSOM_6ULL
 	bool "visionsom-6ull"
 	depends on MX6ULL
@@ -782,7 +777,6 @@ source "board/seal/s5210/Kconfig"
 source "board/seal/s5220/Kconfig"
 source "board/seal/s5628/Kconfig"
 source "board/seco/Kconfig"
-source "board/sks-kinkel/sksimx6/Kconfig"
 source "board/solidrun/mx6cuboxi/Kconfig"
 source "board/somlabs/visionsom-6ull/Kconfig"
 source "board/technexion/pico-imx6/Kconfig"
